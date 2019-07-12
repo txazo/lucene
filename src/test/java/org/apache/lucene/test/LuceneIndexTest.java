@@ -1,5 +1,6 @@
 package org.apache.lucene.test;
 
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.lucene.document.*;
 import org.apache.lucene.index.*;
 import org.apache.lucene.store.Directory;
@@ -7,7 +8,6 @@ import org.apache.lucene.store.FSDirectory;
 import org.junit.Test;
 
 import java.io.File;
-
 
 public class LuceneIndexTest {
 
@@ -18,15 +18,19 @@ public class LuceneIndexTest {
         config.setOpenMode(IndexWriterConfig.OpenMode.CREATE_OR_APPEND);
         IndexWriter writer = new IndexWriter(directory, config);
 
-        Document document = new Document();
-        document.add(new IntField("id", 2, new IndexFieldType()));
-        document.add(new TextField("name", "root", Field.Store.YES));
+        for (int i = 1; i <= 100000; i++) {
+            Document document = new Document();
+            document.add(new StringField("id", String.valueOf(i), Field.Store.YES));
+            document.add(new TextField("name", RandomStringUtils.random(100, "abcde "), Field.Store.YES));
+            document.add(new TextField("value", RandomStringUtils.random(100, "abcde "), Field.Store.YES));
 
-        long docId = writer.addDocument(document);
+            long docId = writer.addDocument(document);
+            System.out.println(String.format("%d %d", i, docId));
+        }
+
         writer.flush();
         writer.commit();
         writer.close();
-
         directory.close();
     }
 
